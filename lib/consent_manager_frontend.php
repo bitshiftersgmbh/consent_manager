@@ -14,7 +14,6 @@ class consent_manager_frontend
     public $domainName = ''; /** @phpstan-ignore-line */
     public $links = []; /** @phpstan-ignore-line */
     public $scripts = []; /** @phpstan-ignore-line */
-    public $scriptsUnselect = []; /** @phpstan-ignore-line */
     public $boxClass = ''; /** @phpstan-ignore-line */
     public $cache = []; /** @phpstan-ignore-line */
     public $version = ''; /** @phpstan-ignore-line */
@@ -96,12 +95,10 @@ class consent_manager_frontend
                     if (isset($this->cache['cookies'][$clang][$uid])) {
                         $this->cookies[$uid] = $this->cache['cookies'][$clang][$uid];
                         $this->scripts[$uid] = $this->cache['cookies'][$clang][$uid]['script'];
-                        $this->scriptsUnselect[$uid] = $this->cache['cookies'][$clang][$uid]['script_unselect'];
                     }
                 }
             }
             $this->scripts = array_filter($this->scripts);
-            $this->scriptsUnselect = array_filter($this->scriptsUnselect);
         }
         if (isset($this->cache['texts'][$clang])) {
             $this->texts = $this->cache['texts'][$clang];
