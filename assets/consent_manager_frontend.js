@@ -53,8 +53,23 @@ const cmCookieAPI = Cookies.withAttributes({ expires: cmCookieExpires, path: '/'
         deleteCookies();
     }
 
+    // on startup trigger scripts of enabled consents
     consents.forEach(function (uid) {
         addScript(consent_managerBox.querySelector('[data-uid="script-' + uid + '"]'));
+        removeScript(consent_managerBox.querySelector('[data-uid="script-unselect-' + uid + '"]'));
+    });
+
+    // on startup trigger unselect-scripts of disabled consents
+    consent_managerBox.querySelectorAll('[data-cookie-uids]').forEach(function (el) {
+        // array mit cookie uids
+        var cookieUids = JSON.parse(el.getAttribute('data-cookie-uids'));
+
+        cookieUids.forEach(function (uid) {
+            if(!consents.includes(uid)) {
+                removeScript(consent_managerBox.querySelector('[data-uid="script-' + uid + '"]'));
+                addScript(consent_managerBox.querySelector('[data-uid="script-unselect-' + uid + '"]'));
+            }
+        });
     });
 
     if (consent_manager_parameters.initially_hidden || consent_manager_parameters.no_cookie_set) {
@@ -129,10 +144,12 @@ const cmCookieAPI = Cookies.withAttributes({ expires: cmCookieExpires, path: '/'
                     cookieUids.forEach(function (uid) {
                         consents.push(uid);
                         addScript(consent_managerBox.querySelector('[data-uid="script-' + uid + '"]'));
+                        removeScript(consent_managerBox.querySelector('[data-uid="script-unselect-' + uid + '"]'));
                     });
                 } else {
                     cookieUids.forEach(function (uid) {
                         removeScript(consent_managerBox.querySelector('[data-uid="script-' + uid + '"]'));
+                        addScript(consent_managerBox.querySelector('[data-uid="script-unselect-' + uid + '"]'));
                     });
                 }
             });
@@ -144,11 +161,13 @@ const cmCookieAPI = Cookies.withAttributes({ expires: cmCookieExpires, path: '/'
                     cookieUids.forEach(function (uid) {
                         consents.push(uid);
                         addScript(consent_managerBox.querySelector('[data-uid="script-' + uid + '"]'));
+                        removeScript(consent_managerBox.querySelector('[data-uid="script-unselect-' + uid + '"]'));
                     });
                 } else {
                     el.checked = false;
                     cookieUids.forEach(function (uid) {
                         removeScript(consent_managerBox.querySelector('[data-uid="script-' + uid + '"]'));
+                        addScript(consent_managerBox.querySelector('[data-uid="script-unselect-' + uid + '"]'));
                     });
                 }
             });
@@ -159,11 +178,11 @@ const cmCookieAPI = Cookies.withAttributes({ expires: cmCookieExpires, path: '/'
         cmCookieAPI.set('consent_manager', JSON.stringify(cookieData));
         if (typeof cmCookieAPI.get('consent_manager') === 'undefined') {
             consent_manager_parameters.no_cookie_set = true;
-            console.warn('Addon consent_manager: Es konnte kein Cookie für die Domain ' + consent_manager_parameters.domain + ' gesetzt werden!');
+            console.warn('Addon consent_manager: Es konnte kein Cookie für die Domain ' + document.domain + ' gesetzt werden!');
         } else {
             var http = new XMLHttpRequest(),
                 url = consent_manager_parameters.fe_controller + '?rex-api-call=consent_manager&buster=' + new Date().getTime(),
-                params = 'domain=' + consent_manager_parameters.domain + '&consentid=' + consent_manager_parameters.consentid + '&buster=' + new Date().getTime();
+                params = 'domain=' + document.domain + '&consentid=' + consent_manager_parameters.consentid + '&buster=' + new Date().getTime();
             http.onerror = (e) => {
                 console.error('Addon consent_manager: Fehler beim speichern des Consent! ' + http.statusText);
             };
